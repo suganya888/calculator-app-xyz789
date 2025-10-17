@@ -83,12 +83,25 @@
             background-color: #5a6268;
             border-color: #5a6268;
         }
+        /* Style for hidden placeholder buttons */
+        .btn-placeholder {
+            visibility: hidden;
+            cursor: default;
+            background-color: transparent;
+            border: none;
+        }
     </style>
 </head>
 <body>
     <div class="calculator">
         <input type="text" id="display" class="form-control" value="0" readonly>
         <div class="calculator-buttons">
+            <!-- New Row for Square Root and Percentage -->
+            <button class="btn btn-operator" id="sqrt">√</button>
+            <button class="btn btn-operator" id="percent">%</button>
+            <button class="btn btn-placeholder">&nbsp;</button> <!-- Placeholder to maintain grid -->
+            <button class="btn btn-placeholder">&nbsp;</button> <!-- Placeholder to maintain grid -->
+
             <button class="btn btn-clear" id="clear">C</button>
             <button class="btn btn-operator" id="divide">/</button>
             <button class="btn btn-operator" id="multiply">*</button>
@@ -151,7 +164,7 @@
             if (operator && !waitingForSecondOperand) {
                 calculate();
             }
-            if (currentInput === '' || currentInput === 'Error') return;
+            if (currentInput === '' || currentInput === 'Error' || currentInput === 'Error: Neg Sqrt') return;
             previousInput = currentInput;
             operator = nextOperator;
             waitingForSecondOperand = true;
@@ -194,6 +207,46 @@
             updateDisplay();
         }
 
+        function performSquareRoot() {
+            const num = parseFloat(currentInput);
+            if (isNaN(num)) {
+                currentInput = 'Error';
+            } else if (num < 0) {
+                currentInput = 'Error: Neg Sqrt';
+            } else {
+                currentInput = String(Math.sqrt(num));
+            }
+            operator = null; // Unary operation clears pending binary operator
+            waitingForSecondOperand = true; // Next number input should start fresh
+            updateDisplay();
+        }
+
+        function performPercentage() {
+            let num = parseFloat(currentInput);
+            if (isNaN(num)) {
+                currentInput = 'Error';
+            } else if (operator && previousInput !== '') {
+                const prev = parseFloat(previousInput);
+                if (isNaN(prev)) { // Should not happen if previousInput is set correctly
+                    currentInput = 'Error';
+                } else {
+                    // For +, -: X + Y% means X + (X * Y / 100)
+                    // For *, /: X * Y% means X * (Y / 100)
+                    if (operator === '+' || operator === '-') {
+                        currentInput = String(prev * num / 100);
+                    } else { // For * and /
+                        currentInput = String(num / 100);
+                    }
+                }
+            } else {
+                currentInput = String(num / 100);
+            }
+            // Do not clear operator if it's part of a pending calculation (e.g. 100 + 20%)
+            // The calculate() function will handle the final operation.
+            waitingForSecondOperand = false; // Allow further input to modify this number
+            updateDisplay();
+        }
+
         function clearCalculator() {
             currentInput = '0';
             previousInput = '';
@@ -210,6 +263,10 @@
         document.getElementById('subtract').addEventListener('click', () => chooseOperator('-'));
         document.getElementById('multiply').addEventListener('click', () => chooseOperator('*'));
         document.getElementById('divide').addEventListener('click', () => chooseOperator('/'));
+
+        // New event listeners for square root and percentage
+        document.getElementById('sqrt').addEventListener('click', performSquareRoot);
+        document.getElementById('percent').addEventListener('click', performPercentage);
 
         for (let i = 0; i <= 9; i++) {
             document.getElementById(`number${i}`).addEventListener('click', () => appendNumber(String(i)));
