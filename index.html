@@ -117,26 +117,28 @@
         <input type="text" id="display" value="0" readonly>
         <div class="buttons-grid">
             <button class="button clear" id="clear">C</button>
+            <button class="button operator" data-operator="sqrt">√</button>
+            <button class="button operator" data-operator="percent">%</button>
             <button class="button operator" data-operator="/">÷</button>
-            <button class="button operator" data-operator="*">×</button>
-            <button class="button operator" data-operator="-">−</button>
 
             <button class="button number" data-number="7">7</button>
             <button class="button number" data-number="8">8</button>
             <button class="button number" data-number="9">9</button>
-            <button class="button operator" data-operator="+">+</button>
+            <button class="button operator" data-operator="*">×</button>
 
             <button class="button number" data-number="4">4</button>
             <button class="button number" data-number="5">5</button>
             <button class="button number" data-number="6">6</button>
+            <button class="button operator" data-operator="-">−</button>
 
             <button class="button number" data-number="1">1</button>
             <button class="button number" data-number="2">2</button>
             <button class="button number" data-number="3">3</button>
-            <button class="button equals" id="equals">=</button>
+            <button class="button operator" data-operator="+">+</button>
 
             <button class="button zero number" data-number="0">0</button>
             <button class="button" id="decimal">.</button>
+            <button class="button equals" id="equals">=</button>
         </div>
     </div>
 
@@ -187,14 +189,52 @@
         function handleOperator(nextOperator) {
             const inputValue = parseFloat(currentInput);
 
-            if (operator && waitingForSecondOperand) {
+            // Handle unary operations: sqrt, percent
+            if (nextOperator === 'sqrt' || nextOperator === 'percent') {
+                if (currentInput === 'Error') {
+                    updateDisplay(); // Keep error state
+                    return;
+                }
+
+                let result;
+                if (nextOperator === 'sqrt') {
+                    if (inputValue < 0) {
+                        currentInput = 'Error';
+                    } else {
+                        result = Math.sqrt(inputValue);
+                        currentInput = String(result);
+                    }
+                } else if (nextOperator === 'percent') {
+                    result = inputValue / 100;
+                    currentInput = String(result);
+                }
+                updateDisplay();
+
+                // If no binary operation was pending, or we were waiting for the second operand,
+                // the result of the unary op becomes the potential first operand for a future binary op.
+                // If a binary operation was pending and we were NOT waiting for a second operand,
+                // it means the unary op was applied to the current second operand, and firstOperand/operator should remain.
+                if (firstOperand === null || waitingForSecondOperand) {
+                    firstOperand = parseFloat(currentInput);
+                    waitingForSecondOperand = false; // Ready for new input, or next op
+                }
+                return; // Unary ops don't set a pending binary operator in the same way binary ops do.
+            }
+
+            // --- Handling binary operations ---
+            if (waitingForSecondOperand) {
+                // This means an operator was pressed, and we are now pressing another operator
+                // before inputting a second number. The operator should be updated.
                 operator = nextOperator;
                 return;
             }
 
             if (firstOperand === null && !isNaN(inputValue)) {
+                // This is the first number input, setting the first operand for a binary operation.
                 firstOperand = inputValue;
             } else if (operator) {
+                // A binary operator was already set, and we have a firstOperand.
+                // We now have a second operand (currentInput). Perform the calculation.
                 const result = performCalculation[operator](firstOperand, inputValue);
                 if (isNaN(result) || !isFinite(result)) { // Handle division by zero or invalid operations
                     currentInput = 'Error';
@@ -205,12 +245,12 @@
                     return;
                 }
                 currentInput = String(result);
-                firstOperand = result;
+                firstOperand = result; // The result becomes the new firstOperand for chaining operations.
             }
 
-            waitingForSecondOperand = true;
-            operator = nextOperator;
-            updateDisplay(); 
+            waitingForSecondOperand = true; // After an operator, we are waiting for the second operand.
+            operator = nextOperator; // Set the new binary operator.
+            updateDisplay();
         }
 
         const performCalculation = {
