@@ -25,12 +25,15 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             grid-gap: 10px;
+            /* Updated grid-template-areas to include squareRoot and percent,
+               and adjusted positions of other operators to maintain 4-column layout
+               without increasing total rows or relying on row spans for + and =. */
             grid-template-areas:
                 "display display display display"
-                "clear divide multiply subtract"
-                "seven eight nine plus"
-                "four five six plus"
-                "one two three equals"
+                "clear squareRoot percent divide"
+                "seven eight nine multiply"
+                "four five six subtract"
+                "one two three plus"
                 "zero zero decimal equals";
         }
 
@@ -107,26 +110,28 @@
         <div id="calculator-display">0</div>
 
         <button class="calc-button clear" style="grid-area: clear;">C</button>
+        <button class="calc-button operator" style="grid-area: squareRoot;">√</button>
+        <button class="calc-button operator" style="grid-area: percent;">%</button>
         <button class="calc-button operator" style="grid-area: divide;">÷</button>
-        <button class="calc-button operator" style="grid-area: multiply;">×</button>
-        <button class="calc-button operator" style="grid-area: subtract;">-</button>
 
         <button class="calc-button" style="grid-area: seven;">7</button>
         <button class="calc-button" style="grid-area: eight;">8</button>
         <button class="calc-button" style="grid-area: nine;">9</button>
-        <button class="calc-button operator" style="grid-area: plus;">+</button>
+        <button class="calc-button operator" style="grid-area: multiply;">×</button>
 
         <button class="calc-button" style="grid-area: four;">4</button>
         <button class="calc-button" style="grid-area: five;">5</button>
         <button class="calc-button" style="grid-area: six;">6</button>
+        <button class="calc-button operator" style="grid-area: subtract;">-</button>
 
         <button class="calc-button" style="grid-area: one;">1</button>
         <button class="calc-button" style="grid-area: two;">2</button>
         <button class="calc-button" style="grid-area: three;">3</button>
-        <button class="calc-button equals" style="grid-area: equals;">=</button>
+        <button class="calc-button operator" style="grid-area: plus;">+</button>
 
         <button class="calc-button" style="grid-area: zero;">0</button>
         <button class="calc-button decimal" style="grid-area: decimal;">.</button>
+        <button class="calc-button equals" style="grid-area: equals;">=</button>
     </div>
 
     <script>
@@ -188,6 +193,7 @@
 
             if (displayValue === 'Error') { // Allow changing operator after an error without clearing
                 operator = nextOperator;
+                waitingForSecondOperand = true; // Still waiting for a new valid number
                 return;
             }
 
@@ -217,6 +223,43 @@
             updateDisplay();
         }
 
+        function handleUnaryOperator(op) {
+            let value = parseFloat(displayValue);
+            if (displayValue === 'Error') {
+                return; // Cannot operate on Error
+            }
+
+            if (op === '√') {
+                if (value < 0) {
+                    displayValue = 'Error';
+                } else {
+                    displayValue = String(Math.sqrt(value));
+                }
+            }
+            waitingForSecondOperand = false;
+            updateDisplay();
+        }
+
+        function handlePercent() {
+            let value = parseFloat(displayValue);
+            if (displayValue === 'Error') {
+                return;
+            }
+
+            if (operator && firstOperand !== null) {
+                // If there's a pending operation, apply percentage relative to firstOperand
+                // Example: 50 + 10% -> 50 + (50 * 0.10)
+                // Example: 50 * 10% -> 50 * 0.10
+                const percentAmount = (firstOperand * value) / 100;
+                displayValue = String(percentAmount);
+            } else {
+                // No pending operation, simply convert current value to percentage
+                displayValue = String(value / 100);
+            }
+            waitingForSecondOperand = false;
+            updateDisplay();
+        }
+
         const performCalculation = {
             '÷': (firstOperand, secondOperand) => secondOperand === 0 ? 'Error' : firstOperand / secondOperand,
             '×': (firstOperand, secondOperand) => firstOperand * secondOperand,
@@ -230,6 +273,16 @@
 
                 if (event.target.classList.contains('clear')) {
                     clearAll();
+                    return;
+                }
+
+                if (textContent === '√') {
+                    handleUnaryOperator('√');
+                    return;
+                }
+
+                if (textContent === '%') {
+                    handlePercent();
                     return;
                 }
 
@@ -254,7 +307,8 @@
                     if (result === 'Error') {
                         displayValue = 'Error';
                     } else {
-                        displayValue = String(result);
+                        // Handle potential floating point inaccuracies for display
+                        displayValue = String(parseFloat(result.toFixed(10))); 
                     }
                     
                     firstOperand = null; // Reset for next calculation
