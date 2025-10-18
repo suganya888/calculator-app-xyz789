@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,143 +12,149 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            background-color: #f4f7f6;
+            background-color: #f0f2f5;
             color: #333;
         }
 
-        .calculator {
-            background-color: #ffffff;
-            border-radius: 15px;
+        #calculator {
+            background-color: #fff;
+            border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             padding: 20px;
             width: 320px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+
+        #display {
+            width: calc(100% - 20px);
+            height: 60px;
+            margin-bottom: 20px;
+            padding: 10px;
+            font-size: 2.5em;
+            text-align: right;
+            border: none;
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+            color: #333;
+            box-sizing: border-box;
+            overflow: hidden; /* Prevent text overflow */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+
+        .buttons-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            grid-gap: 10px;
-            /* Updated grid-template-areas to include squareRoot and percent,
-               and adjusted positions of other operators to maintain 4-column layout
-               without increasing total rows or relying on row spans for + and =. */
-            grid-template-areas:
-                "display display display display"
-                "clear squareRoot percent divide"
-                "seven eight nine multiply"
-                "four five six subtract"
-                "one two three plus"
-                "zero zero decimal equals";
+            gap: 10px;
         }
 
-        #calculator-display {
-            grid-area: display;
-            background-color: #222;
-            color: #fff;
-            font-size: 2.5em;
-            padding: 20px;
-            text-align: right;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            min-height: 1.2em; /* Ensure consistent height */
-            display: flex;
-            align-items: center; /* Vertically center text */
-            justify-content: flex-end; /* Right align text */
-        }
-
-        .calc-button {
+        .button {
             width: 100%;
             height: 60px;
+            font-size: 1.8em;
             border: none;
-            border-radius: 10px;
-            font-size: 1.5em;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
+            transition: background-color 0.2s, transform 0.1s;
             background-color: #e0e0e0;
             color: #333;
-            outline: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE10+/Edge */
+            user-select: none; /* Standard */
         }
 
-        .calc-button:hover {
+        .button:hover {
             background-color: #d0d0d0;
-            transform: scale(1.02);
+            transform: translateY(-1px);
         }
 
-        .calc-button:active {
-            transform: scale(0.98);
+        .button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
-        .calc-button.operator {
-            background-color: #f39c12;
+        .button.operator {
+            background-color: #ff9500;
             color: #fff;
         }
 
-        .calc-button.operator:hover {
-            background-color: #e08e0b;
+        .button.operator:hover {
+            background-color: #e68a00;
         }
 
-        .calc-button.equals {
-            background-color: #2ecc71;
+        .button.equals {
+            background-color: #007aff;
             color: #fff;
         }
 
-        .calc-button.equals:hover {
-            background-color: #27ae60;
+        .button.equals:hover {
+            background-color: #006ee6;
         }
 
-        .calc-button.clear {
-            background-color: #e74c3c;
+        .button.clear {
+            background-color: #ff3b30;
             color: #fff;
         }
 
-        .calc-button.clear:hover {
-            background-color: #c0392b;
+        .button.clear:hover {
+            background-color: #e6352b;
+        }
+
+        /* Span for 0 button */
+        .button.zero {
+            grid-column: span 2;
         }
     </style>
 </head>
 <body>
-    <div class="calculator">
-        <div id="calculator-display">0</div>
+    <div id="calculator">
+        <input type="text" id="display" value="0" readonly>
+        <div class="buttons-grid">
+            <button class="button clear" id="clear">C</button>
+            <button class="button operator" data-operator="/">÷</button>
+            <button class="button operator" data-operator="*">×</button>
+            <button class="button operator" data-operator="-">−</button>
 
-        <button class="calc-button clear" style="grid-area: clear;">C</button>
-        <button class="calc-button operator" style="grid-area: squareRoot;">√</button>
-        <button class="calc-button operator" style="grid-area: percent;">%</button>
-        <button class="calc-button operator" style="grid-area: divide;">÷</button>
+            <button class="button number" data-number="7">7</button>
+            <button class="button number" data-number="8">8</button>
+            <button class="button number" data-number="9">9</button>
+            <button class="button operator" data-operator="+">+</button>
 
-        <button class="calc-button" style="grid-area: seven;">7</button>
-        <button class="calc-button" style="grid-area: eight;">8</button>
-        <button class="calc-button" style="grid-area: nine;">9</button>
-        <button class="calc-button operator" style="grid-area: multiply;">×</button>
+            <button class="button number" data-number="4">4</button>
+            <button class="button number" data-number="5">5</button>
+            <button class="button number" data-number="6">6</button>
 
-        <button class="calc-button" style="grid-area: four;">4</button>
-        <button class="calc-button" style="grid-area: five;">5</button>
-        <button class="calc-button" style="grid-area: six;">6</button>
-        <button class="calc-button operator" style="grid-area: subtract;">-</button>
+            <button class="button number" data-number="1">1</button>
+            <button class="button number" data-number="2">2</button>
+            <button class="button number" data-number="3">3</button>
+            <button class="button equals" id="equals">=</button>
 
-        <button class="calc-button" style="grid-area: one;">1</button>
-        <button class="calc-button" style="grid-area: two;">2</button>
-        <button class="calc-button" style="grid-area: three;">3</button>
-        <button class="calc-button operator" style="grid-area: plus;">+</button>
-
-        <button class="calc-button" style="grid-area: zero;">0</button>
-        <button class="calc-button decimal" style="grid-area: decimal;">.</button>
-        <button class="calc-button equals" style="grid-area: equals;">=</button>
+            <button class="button zero number" data-number="0">0</button>
+            <button class="button" id="decimal">.</button>
+        </div>
     </div>
 
     <script>
-        const display = document.getElementById('calculator-display');
-        const buttons = document.querySelectorAll('.calc-button');
+        const display = document.getElementById('display');
+        const buttons = document.querySelectorAll('.button');
 
-        let displayValue = '0';
+        let currentInput = '0';
         let firstOperand = null;
         let operator = null;
         let waitingForSecondOperand = false;
 
         function updateDisplay() {
-            display.textContent = displayValue;
+            display.value = currentInput;
         }
 
-        function clearAll() {
-            displayValue = '0';
+        function clearCalculator() {
+            currentInput = '0';
             firstOperand = null;
             operator = null;
             waitingForSecondOperand = false;
@@ -156,169 +162,98 @@
         }
 
         function inputDigit(digit) {
-            if (displayValue === 'Error') { // Clear error state on new digit input
-                displayValue = '0';
-            }
             if (waitingForSecondOperand) {
-                displayValue = digit;
+                currentInput = digit;
                 waitingForSecondOperand = false;
             } else {
-                displayValue = displayValue === '0' ? digit : displayValue + digit;
+                currentInput = currentInput === '0' || currentInput === 'Error' ? digit : currentInput + digit;
             }
             updateDisplay();
         }
 
-        function inputDecimal(dot) {
-            if (displayValue === 'Error') { // Clear error state on decimal input
-                displayValue = '0.';
-                waitingForSecondOperand = false;
-                updateDisplay();
-                return;
-            }
+        function inputDecimal() {
             if (waitingForSecondOperand) {
-                displayValue = '0.';
+                currentInput = '0.';
                 waitingForSecondOperand = false;
                 updateDisplay();
                 return;
             }
-
-            if (!displayValue.includes(dot)) {
-                displayValue += dot;
+            if (!currentInput.includes('.')) {
+                currentInput += '.';
             }
             updateDisplay();
         }
 
         function handleOperator(nextOperator) {
-            const inputValue = parseFloat(displayValue);
-
-            if (displayValue === 'Error') { // Allow changing operator after an error without clearing
-                operator = nextOperator;
-                waitingForSecondOperand = true; // Still waiting for a new valid number
-                return;
-            }
+            const inputValue = parseFloat(currentInput);
 
             if (operator && waitingForSecondOperand) {
                 operator = nextOperator;
                 return;
             }
 
-            if (firstOperand === null) {
+            if (firstOperand === null && !isNaN(inputValue)) {
                 firstOperand = inputValue;
             } else if (operator) {
                 const result = performCalculation[operator](firstOperand, inputValue);
-
-                if (result === 'Error') {
-                    displayValue = 'Error';
-                    firstOperand = null; // Reset state fully on error
+                if (isNaN(result) || !isFinite(result)) { // Handle division by zero or invalid operations
+                    currentInput = 'Error';
+                    firstOperand = null;
                     operator = null;
                     waitingForSecondOperand = false;
-                } else {
-                    displayValue = String(result);
-                    firstOperand = result;
+                    updateDisplay();
+                    return;
                 }
+                currentInput = String(result);
+                firstOperand = result;
             }
 
             waitingForSecondOperand = true;
             operator = nextOperator;
-            updateDisplay();
-        }
-
-        function handleUnaryOperator(op) {
-            let value = parseFloat(displayValue);
-            if (displayValue === 'Error') {
-                return; // Cannot operate on Error
-            }
-
-            if (op === '√') {
-                if (value < 0) {
-                    displayValue = 'Error';
-                } else {
-                    displayValue = String(Math.sqrt(value));
-                }
-            }
-            waitingForSecondOperand = false;
-            updateDisplay();
-        }
-
-        function handlePercent() {
-            let value = parseFloat(displayValue);
-            if (displayValue === 'Error') {
-                return;
-            }
-
-            if (operator && firstOperand !== null) {
-                // If there's a pending operation, apply percentage relative to firstOperand
-                // Example: 50 + 10% -> 50 + (50 * 0.10)
-                // Example: 50 * 10% -> 50 * 0.10
-                const percentAmount = (firstOperand * value) / 100;
-                displayValue = String(percentAmount);
-            } else {
-                // No pending operation, simply convert current value to percentage
-                displayValue = String(value / 100);
-            }
-            waitingForSecondOperand = false;
-            updateDisplay();
+            updateDisplay(); 
         }
 
         const performCalculation = {
-            '÷': (firstOperand, secondOperand) => secondOperand === 0 ? 'Error' : firstOperand / secondOperand,
-            '×': (firstOperand, secondOperand) => firstOperand * secondOperand,
-            '+': (firstOperand, secondOperand) => firstOperand + secondOperand,
-            '-': (firstOperand, secondOperand) => firstOperand - secondOperand
+            '/': (first, second) => second === 0 ? NaN : first / second,
+            '*': (first, second) => first * second,
+            '+': (first, second) => first + second,
+            '-': (first, second) => first - second
         };
 
         buttons.forEach(button => {
             button.addEventListener('click', (event) => {
-                const { textContent } = event.target;
+                const { target } = event;
 
-                if (event.target.classList.contains('clear')) {
-                    clearAll();
+                if (target.classList.contains('clear')) {
+                    clearCalculator();
                     return;
                 }
 
-                if (textContent === '√') {
-                    handleUnaryOperator('√');
+                if (target.classList.contains('operator')) {
+                    handleOperator(target.dataset.operator);
                     return;
                 }
 
-                if (textContent === '%') {
-                    handlePercent();
+                if (target.classList.contains('number')) {
+                    inputDigit(target.dataset.number);
                     return;
                 }
 
-                if (event.target.classList.contains('operator')) {
-                    handleOperator(textContent);
+                if (target.id === 'decimal') {
+                    inputDecimal();
                     return;
                 }
 
-                if (event.target.classList.contains('decimal')) {
-                    inputDecimal('.');
-                    return;
-                }
-
-                if (event.target.classList.contains('equals')) {
-                    if (firstOperand === null || operator === null || displayValue === 'Error') {
-                        return; // Nothing to calculate or already in error state
+                if (target.id === 'equals') {
+                    if (firstOperand === null || operator === null || waitingForSecondOperand) {
+                        return; // Nothing to calculate or already calculated
                     }
-
-                    const inputValue = parseFloat(displayValue);
-                    const result = performCalculation[operator](firstOperand, inputValue);
-
-                    if (result === 'Error') {
-                        displayValue = 'Error';
-                    } else {
-                        // Handle potential floating point inaccuracies for display
-                        displayValue = String(parseFloat(result.toFixed(10))); 
-                    }
-                    
+                    handleOperator(operator); // Trigger calculation
                     firstOperand = null; // Reset for next calculation
                     operator = null;
-                    waitingForSecondOperand = true; // Ready for new operation
-                    updateDisplay();
+                    waitingForSecondOperand = true; // Ready for new input
                     return;
                 }
-
-                inputDigit(textContent);
             });
         });
 
